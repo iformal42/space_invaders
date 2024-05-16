@@ -1,4 +1,5 @@
 import asyncio
+import sys
 import pygame as pg
 import random as rd
 import time
@@ -177,7 +178,9 @@ async def main():
 
     # initialize the pygame
     pg.init()
-    pg.mixer.SoundPatch()
+
+    if sys.platform == 'emscripten':
+        pg.mixer.SoundPatch()
 
     clock = pg.time.Clock()
 
@@ -322,3 +325,5 @@ async def main():
 
 
 asyncio.run(main())
+
+# richmond kleinson was here lol
