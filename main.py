@@ -1,8 +1,11 @@
 import asyncio
 import pygame as pg
-from pygame import mixer
 import random as rd
 import time
+
+from os import path
+def newPath(relPath: str):
+    return path.join(path.abspath(""), relPath)
 
 """Note: All the classes is in main.py no need import any other file
 
@@ -11,16 +14,16 @@ import time
 
 # friends_list = [f"frends/a{image}.png" for image in range(1, 3)]
 # print(friends_list)
-img_path = "img/"
-sound_path = "sfx/"
+img_path = newPath("img/")
+sound_path = newPath("sfx/")
 ICON = pg.image.load(f"{img_path}space-game.png")
 BACKGROUND = pg.image.load(f"{img_path}space1.png")
 SPACE_SHIP = f"{img_path}spaceship.png"
 ENEMY = f"{img_path}alien.png"
-SHOOT = False
-IS_BOUNDARY_CROSS = False
-ENEMY_SPEED = 2.0
-ENEMY_COUNT = 6
+shoot = False
+is_boundary_cross = False
+enemy_speed = 2.0
+enemy_count = 6
 
 
 class Enemy(object):
@@ -44,7 +47,6 @@ class Enemy(object):
     # def cooked_enemy(self,list1,list2,list3,list4,list5):
 
 
-img_path = "./img/"
 ORIGIN = (368, 820)
 b_position = (-20, 0)
 # b = pg.image.load("space1.png")
@@ -128,7 +130,7 @@ class Explosion(pg.sprite.Sprite):
 
 class Board:
     def __init__(self, screen, font="freesansbold.ttf"):
-        with open("./highscore.txt") as s:
+        with open(newPath("highscore.txt")) as s:
             self.high_score = int(s.read())
         self.font_style = font
         self.window = screen
@@ -156,7 +158,7 @@ class Board:
 
 
 async def main():
-    global ENEMY_COUNT, SHOOT, ENEMY_SPEED, IS_BOUNDARY_CROSS
+    global enemy_count, shoot, enemy_speed, is_boundary_cross
 
     def enemy_pos():
         new_y = rd.randint(10, 200)
@@ -175,6 +177,7 @@ async def main():
 
     # initialize the pygame
     pg.init()
+    pg.mixer.SoundPatch()
 
     clock = pg.time.Clock()
 
@@ -182,13 +185,13 @@ async def main():
     window = pg.display.set_mode((800, 920))  # , pg.FULLSCREEN | pg.SCALED)
 
     # background music
-    mixer.music.load(f'{sound_path}backgroundmusic.mp3')
-    mixer.music.play(-1)
+    pg.mixer.music.load(f'{sound_path}backgroundmusic.mp3')
+    pg.mixer.music.play(-1)
 
     # sounds
-    bullet_sound = mixer.Sound(f"{sound_path}bullet_sound.mp3")
-    destroy_sound = mixer.Sound(f"{sound_path}destroy_sound.mp3")
-    enemy_destroy = mixer.Sound(f"{sound_path}enemy_destroy.mp3")
+    bullet_sound = pg.mixer.Sound(f"{sound_path}bullet_sound.mp3")
+    destroy_sound = pg.mixer.Sound(f"{sound_path}destroy_sound.mp3")
+    enemy_destroy = pg.mixer.Sound(f"{sound_path}enemy_destroy.mp3")
 
     # window icon and title
     pg.display.set_icon(ICON)
@@ -200,13 +203,10 @@ async def main():
     # adding player object
     player = Player(SPACE_SHIP, window)
 
-    # updating screen
-    pg.display.flip()
-
     # controlling bullet
     bullet_y = player.rect_2.y
     bullet_x = player.rect_2.x
-    is_bullet_disappear = True
+    # is_bullet_disappear = True
 
     # controlling enemy
     # adding enemy object
@@ -215,7 +215,7 @@ async def main():
     enemy_y_list = []
     enemy_direction = []
     enemy_rect = []
-    cook_enemy(ENEMY_COUNT)
+    cook_enemy(enemy_count)
 
     explode = Explosion(window)
     blast = False
@@ -247,32 +247,32 @@ async def main():
                 player.move_down()
             if pressed[pg.K_SPACE]:
                 """command to fire a bullet"""
-                if not SHOOT:
+                if not shoot:
                     bullet_sound.play()
                     bullet_x = player.x
                     bullet_y = player.y
-                    SHOOT = True
+                    shoot = True
         # firing a bullet
-        if SHOOT:
+        if shoot:
             bullet_y -= 10
             player.fire(bullet_x, bullet_y)
             if bullet_y <= -35:
                 player.rect_2.y = player.y
                 player.rect_2.x = player.x
-                SHOOT = False
+                shoot = False
 
         # moving  multiple enemies on screen
-        for i in range(ENEMY_COUNT):
+        for i in range(enemy_count):
             enemy_x = enemy_x_list[i]
             enemy_y = enemy_y_list[i]
             if enemy_x <= 20 or enemy_x >= 720:
                 enemy_direction[i] *= -1
                 enemy_y_list[i] += 35
 
-            enemy_x_list[i] += ENEMY_SPEED * enemy_direction[i]
+            enemy_x_list[i] += enemy_speed * enemy_direction[i]
             enemy_list[i].appear(enemy_x_list[i], enemy_y_list[i])
             if enemy_y >= 910:
-                IS_BOUNDARY_CROSS = True
+                is_boundary_cross = True
 
         # checking collision of bullet and enemy and making position of both default state
         n = player.rect_2.collidelist(enemy_rect)
@@ -284,7 +284,7 @@ async def main():
             enemy_destroy.play()
             player.rect_2.x = player.x
             player.rect_2.y = player.y
-            SHOOT = False
+            shoot = False
             enemy_x_list[n] = rd.randint(200, 700)
             enemy_y_list[n] = rd.randint(10, 200)
             enemy_list[n].appear(enemy_x_list[n], enemy_y_list[n])
@@ -293,22 +293,21 @@ async def main():
 
             # increasing enemy
             if score % 10 == 0:
-                ENEMY_COUNT += 1
+                enemy_count += 1
                 cook_enemy(1)
 
             # increasing enemy speed
-            if score % 5 == 0 and ENEMY_SPEED <= 10:
-                ENEMY_SPEED *= 1.1
+            if score % 5 == 0 and enemy_speed <= 10:
+                enemy_speed *= 1.1
 
         if blast:
             explode.u()
             blast = explode.is_done
 
         # game over condition
-        if player.rect_1.collidelist(enemy_rect) >= 0 or IS_BOUNDARY_CROSS:
+        if player.rect_1.collidelist(enemy_rect) >= 0 or is_boundary_cross:
             destroy_sound.play()
             board.game_over(70, (255, 255, 255), (200, 380))
-            pg.display.update()
             time.sleep(4)
             break
 
