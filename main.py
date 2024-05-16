@@ -2,8 +2,12 @@ import asyncio
 import pygame as pg
 from pygame import mixer
 import random as rd
-
 import time
+
+"""Note: All the classes is in main.py no need import any other file
+
+
+"""
 
 # friends_list = [f"frends/a{image}.png" for image in range(1, 3)]
 # print(friends_list)
