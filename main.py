@@ -1,12 +1,12 @@
 import asyncio
-import sys
+# import sys
 import pygame as pg
 import random as rd
 import time
 
-from os import path
-def newPath(relPath: str):
-    return path.join(path.abspath(""), relPath)
+# from os import path
+# def newPath(relPath: str):
+#     return path.join(path.abspath(""), relPath)
 
 """Note: All the classes is in main.py no need import any other file
 
@@ -15,8 +15,8 @@ def newPath(relPath: str):
 
 # friends_list = [f"frends/a{image}.png" for image in range(1, 3)]
 # print(friends_list)
-img_path = newPath("img/")
-sound_path = newPath("sfx/")
+img_path = "img/" 
+sound_path = "sfx/" 
 ICON = pg.image.load(f"{img_path}space-game.png")
 BACKGROUND = pg.image.load(f"{img_path}space1.png")
 SPACE_SHIP = f"{img_path}spaceship.png"
@@ -179,8 +179,8 @@ async def main():
     # initialize the pygame
     pg.init()
 
-    if sys.platform == 'emscripten':
-        pg.mixer.SoundPatch()
+    # if sys.platform == 'emscripten':
+    #     pg.mixer.SoundPatch()
 
     clock = pg.time.Clock()
 
